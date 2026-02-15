@@ -1,26 +1,65 @@
 @import "tailwindcss";
 
+/* Design System - Raphael José Giampietro Fiuza Pequeno Advocacia
+   Paleta: Azul Profundo, Off-White, Cinza Claro, Dourado Minimalista. SEM marrom. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf9;
+  --foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --primary: #0f172a;
+  --primary-foreground: #fafaf9;
+  --accent: #c9a227;
+  --accent-foreground: #0f172a;
+  --border: #e2e8f0;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --destructive: #dc2626;
+  --ring: #0f172a;
+  --radius: 0.5rem;
+  --blue-deep: #0c1222;
+  --blue-mid: #1e3a5f;
+  --gold: #c9a227;
+  --gold-light: #e5d4a1;
+  --off-white: #fafaf9;
+  --gray-light: #f1f5f9;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-accent: var(--accent);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-blue-deep: #0c1222;
+  --color-blue-mid: #1e3a5f;
+  --color-gold: #c9a227;
+  --color-gold-light: #e5d4a1;
+  --color-off-white: #fafaf9;
+  --color-gray-light: #f1f5f9;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 4px);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Evitar palavras viúvas em blocos de texto (ex: "seu problema jurídico") */
+.no-widow {
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .no-widow {
+    white-space: normal;
+  }
 }
