@@ -14,6 +14,7 @@ export const schedulingFormSchema = z.object({
   preferredDate: z.string().min(1, "Selecione uma data"),
   preferredTime: z.string().min(1, "Selecione um horário"),
   subject: z.string().optional(),
+  paymentMethod: z.enum(["boleto", "pix", "card"]).optional().default("boleto"),
 });
 
 export const loginSchema = z.object({

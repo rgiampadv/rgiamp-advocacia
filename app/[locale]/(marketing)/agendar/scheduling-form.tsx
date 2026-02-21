@@ -13,6 +13,9 @@ export function SchedulingForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [boletoUrl, setBoletoUrl] = useState<string | null>(null);
+  const [pixCopyPaste, setPixCopyPaste] = useState<string | null>(null);
+  const [pixQrCodeImage, setPixQrCodeImage] = useState<string | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<"boleto" | "pix" | "card">("boleto");
   const [form, setForm] = useState<Partial<SchedulingFormData>>({});
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
@@ -35,6 +38,7 @@ export function SchedulingForm() {
       preferredDate: form.preferredDate!,
       preferredTime: form.preferredTime!,
       subject: (fd.get("subject") as string) || undefined,
+      paymentMethod,
     };
     const parsed = schedulingFormSchema.safeParse(data);
     if (!parsed.success) {
@@ -48,29 +52,90 @@ export function SchedulingForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(parsed.data),
       });
-      const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Erro ao gerar boleto");
-      setBoletoUrl(json.boletoUrl);
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const msg = (json as { error?: string }).error ?? "Erro ao gerar pagamento.";
+        setError(msg);
+        return;
+      }
+      setBoletoUrl(json.boletoUrl ?? null);
+      setPixCopyPaste(json.pixCopyPaste ?? null);
+      setPixQrCodeImage(json.pixQrCodeImage ?? null);
+      setPaymentMethod((json.paymentMethod as "boleto" | "pix" | "card") ?? "boleto");
       setStep(3);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao agendar.");
+      const isNetwork = err instanceof TypeError && (err.message === "Failed to fetch" || err.message === "Load failed");
+      let message = "Erro ao agendar.";
+      if (isNetwork) message = "Não foi possível conectar ao servidor. Verifique sua internet ou tente novamente. Se o problema continuar, entre em contato pelo WhatsApp.";
+      else if (err instanceof Error) message = err.message;
+      setError(message);
     } finally {
       setLoading(false);
     }
   };
 
-  if (step === 3 && boletoUrl) {
+  if (step === 3 && (boletoUrl || pixCopyPaste)) {
     return (
       <div className="rounded-lg border border-[var(--border)] bg-[var(--card)] p-6">
         <h2 className="text-lg font-semibold text-[var(--blue-deep)]">{t("step3")}</h2>
         <p className="mt-2 text-sm text-[var(--muted-foreground)]">
-          Seu boleto foi gerado. Após o pagamento, você receberá a confirmação por e-mail e o evento será adicionado à agenda.
+          Após o pagamento, você receberá a confirmação por e-mail.
         </p>
-        <Button asChild className="mt-4">
-          <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
-            Ver / Imprimir boleto
-          </a>
-        </Button>
+
+        {pixCopyPaste && (
+          <div className="mt-4 space-y-3">
+            <p className="text-sm font-medium text-[var(--foreground)]">Pague via PIX (copia e cola ou QR Code):</p>
+            <div className="flex flex-col gap-2">
+              <textarea
+                readOnly
+                value={pixCopyPaste}
+                className="w-full rounded-md border border-[var(--border)] bg-[var(--muted)]/50 p-3 text-xs font-mono"
+                rows={4}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => navigator.clipboard.writeText(pixCopyPaste)}
+              >
+                Copiar código PIX
+              </Button>
+            </div>
+            {pixQrCodeImage && (
+              <div className="flex justify-center">
+                <img
+                  src={`data:image/png;base64,${pixQrCodeImage}`}
+                  alt="QR Code PIX"
+                  className="h-48 w-48 rounded border border-[var(--border)]"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        {paymentMethod === "card" && boletoUrl && (
+          <Button asChild className="mt-4">
+            <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
+              Pagar com cartão (página segura Asaas)
+            </a>
+          </Button>
+        )}
+
+        {paymentMethod === "boleto" && boletoUrl && (
+          <Button asChild className="mt-4">
+            <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
+              Ver / Imprimir boleto
+            </a>
+          </Button>
+        )}
+
+        {!pixCopyPaste && paymentMethod !== "card" && paymentMethod !== "boleto" && boletoUrl && (
+          <Button asChild className="mt-4">
+            <a href={boletoUrl} target="_blank" rel="noopener noreferrer">
+              Ver boleto / pagamento
+            </a>
+          </Button>
+        )}
       </div>
     );
   }
@@ -114,6 +179,29 @@ export function SchedulingForm() {
             className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
           />
         </div>
+
+        <div>
+          <label className="block text-sm font-medium text-[var(--foreground)] mb-2">Forma de pagamento</label>
+          <div className="flex flex-wrap gap-2">
+            {(["boleto", "pix", "card"] as const).map((method) => (
+              <button
+                key={method}
+                type="button"
+                onClick={() => setPaymentMethod(method)}
+                className={`rounded-md border px-4 py-2 text-sm transition-colors ${
+                  paymentMethod === method
+                    ? "border-[var(--gold)] bg-[var(--gold)]/10 text-[var(--blue-deep)]"
+                    : "border-[var(--border)] hover:bg-[var(--muted)]"
+                }`}
+              >
+                {method === "boleto" && "Boleto"}
+                {method === "pix" && "PIX"}
+                {method === "card" && "Cartão (crédito/débito)"}
+              </button>
+            ))}
+          </div>
+        </div>
+
         <p className="text-sm text-[var(--muted-foreground)]">
           Data: {form.preferredDate} às {form.preferredTime}. Valor: R$ {(CONSULTATION_PRICE / 100).toFixed(2)}.
         </p>
@@ -123,7 +211,7 @@ export function SchedulingForm() {
             Voltar
           </Button>
           <Button type="submit" variant="accent" disabled={loading}>
-            {loading ? "Gerando boleto..." : "Gerar boleto"}
+            {loading ? "Gerando pagamento..." : paymentMethod === "pix" ? "Gerar PIX" : paymentMethod === "card" ? "Ir para pagamento com cartão" : "Gerar boleto"}
           </Button>
         </div>
       </form>

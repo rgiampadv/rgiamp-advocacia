@@ -9,8 +9,9 @@ export async function POST(request: Request) {
   try {
     const body = await request.json();
     const schedulingId =
-      body.payment?.id ??
+      body.payment?.externalReference ??
       body.externalReference ??
+      body.payment?.id ??
       body.reference_id ??
       body.referenceId;
     if (!schedulingId || typeof schedulingId !== "string") {

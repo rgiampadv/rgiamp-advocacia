@@ -13,6 +13,8 @@ const navLinks = [
     { key: "jec", href: "/areas/jec" },
     { key: "consumer", href: "/areas/consumidor" },
     { key: "criminal", href: "/areas/criminal" },
+    { key: "bancario", href: "/areas/bancario" },
+    { key: "tributario", href: "/areas/tributario" },
   ]},
   { key: "about", href: "/sobre" },
 ] as const;
@@ -25,13 +27,14 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[var(--border)] bg-[var(--card)]/95 backdrop-blur supports-[backdrop-filter]:bg-[var(--card)]/80">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
-        <div className="-ml-1 mr-10 sm:mr-12">
-          <Logo />
-        </div>
+      <div className="container mx-auto flex h-16 items-center justify-between pl-2 pr-4 sm:pl-3 sm:pr-6">
+        <div className="-ml-5 flex flex-1 items-center gap-0 min-w-0 sm:-ml-6">
+          <div className="mr-10 sm:mr-12 shrink-0">
+            <Logo />
+          </div>
 
         {/* Desktop nav */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden md:flex items-center gap-6 shrink-0">
           <Link
             href="/"
             className={cn(
@@ -61,7 +64,7 @@ export function Header() {
               </svg>
             </button>
             {areasOpen && (
-              <div className="absolute left-0 top-full mt-1 w-48 rounded-md border border-[var(--border)] bg-[var(--card)] py-1 shadow-lg">
+              <div className="absolute left-0 top-full pt-1 w-48 rounded-md border border-[var(--border)] bg-[var(--card)] py-1 shadow-lg">
                 <Link
                   href="/areas/jec"
                   className="block px-4 py-2 text-sm hover:bg-[var(--muted)]"
@@ -83,9 +86,27 @@ export function Header() {
                 >
                   {t("criminal")}
                 </Link>
+                <Link
+                  href="/areas/bancario"
+                  className="block px-4 py-2 text-sm hover:bg-[var(--muted)]"
+                  onClick={() => setAreasOpen(false)}
+                >
+                  {t("bancario")}
+                </Link>
+                <Link
+                  href="/areas/tributario"
+                  className="block px-4 py-2 text-sm hover:bg-[var(--muted)]"
+                  onClick={() => setAreasOpen(false)}
+                >
+                  {t("tributario")}
+                </Link>
               </div>
             )}
           </div>
+        </nav>
+        </div>
+
+        <div className="hidden md:flex items-center gap-6 shrink-0">
           <Link
             href="/sobre"
             className={cn(
@@ -95,19 +116,6 @@ export function Header() {
           >
             {t("about")}
           </Link>
-          <Link
-            href="/parcerias"
-            className={cn(
-              "text-sm font-medium transition-colors hover:text-[var(--gold)]",
-              pathname === "/parcerias" ? "text-[var(--gold)]" : "text-[var(--foreground)]"
-            )}
-          >
-            {t("partnership")}
-          </Link>
-        </nav>
-
-        <div className="hidden md:flex items-center gap-3">
-          <LocaleSelector />
           <Button asChild size="sm" variant="accent">
             <Link href="/agendar">{t("schedule")}</Link>
           </Button>
@@ -118,7 +126,6 @@ export function Header() {
 
         {/* Mobile menu button */}
         <div className="flex items-center gap-2 md:hidden">
-          <LocaleSelector />
           <button
             type="button"
             className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-[var(--border)] bg-transparent hover:bg-[var(--muted)] active:bg-[var(--muted)]"
@@ -154,11 +161,14 @@ export function Header() {
             <Link href="/areas/criminal" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
               {t("criminal")}
             </Link>
+            <Link href="/areas/bancario" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
+              {t("bancario")}
+            </Link>
+            <Link href="/areas/tributario" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
+              {t("tributario")}
+            </Link>
             <Link href="/sobre" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm font-medium hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
               {t("about")}
-            </Link>
-            <Link href="/parcerias" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm font-medium hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
-              {t("partnership")}
             </Link>
             <div className="mt-2 flex flex-col gap-2 border-t border-[var(--border)] pt-4">
               <Button asChild variant="accent" className="h-12 w-full min-h-[44px]">
@@ -175,30 +185,3 @@ export function Header() {
   );
 }
 
-function LocaleSelector() {
-  const pathname = usePathname();
-  const locales = [
-    { code: "pt", flag: "🇧🇷" },
-    { code: "en", flag: "🇺🇸" },
-    { code: "es", flag: "🇪🇸" },
-    { code: "it", flag: "🇮🇹" },
-    { code: "fr", flag: "🇫🇷" },
-    { code: "de", flag: "🇩🇪" },
-    { code: "zh", flag: "🇨🇳" },
-  ] as const;
-
-  return (
-    <div className="flex items-center gap-0.5 rounded-md border border-[var(--border)] bg-[var(--muted)]/50 p-1 -ml-2">
-      {locales.map(({ code, flag }) => (
-        <Link
-          key={code}
-          href={pathname}
-          locale={code}
-          className="rounded px-1.5 py-1 text-base font-medium hover:bg-[var(--muted)] hover:text-[var(--foreground)]"
-        >
-          {flag}
-        </Link>
-      ))}
-    </div>
-  );
-}

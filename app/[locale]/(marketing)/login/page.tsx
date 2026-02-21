@@ -5,6 +5,7 @@ import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams, useParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import { Link } from "@/i18n/routing";
 
 function LoginForm() {
   const t = useTranslations("nav");
@@ -74,6 +75,9 @@ function LoginForm() {
           {loading ? "Entrando..." : "Entrar"}
         </Button>
       </form>
+      <p className="mt-4 text-center text-sm text-[var(--muted-foreground)]">
+        Não tem conta? <Link href="/cadastro" className="text-[var(--gold)] hover:underline">Cadastre-se</Link>
+      </p>
     </div>
   );
 }

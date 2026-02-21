@@ -1,5 +1,5 @@
 const LEGAL_SERVICE_JSON_LD = (locale: string) => {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.rgiamp.adv.com";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.rgiamp.adv.br";
   return {
     "@context": "https://schema.org",
     "@type": "LegalService",

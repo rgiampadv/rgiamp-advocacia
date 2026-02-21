@@ -7,10 +7,15 @@ export default async function AreaDoClientePage() {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) return null;
 
-  const lawsuits = await prisma.lawsuit.findMany({
-    where: { userId: session.user.id },
-    orderBy: { updatedAt: "desc" },
-  });
+  let lawsuits: Awaited<ReturnType<typeof prisma.lawsuit.findMany>> = [];
+  try {
+    lawsuits = await prisma.lawsuit.findMany({
+      where: { userId: session.user.id },
+      orderBy: { updatedAt: "desc" },
+    });
+  } catch {
+    // DATABASE_URL não configurado ou indisponível
+  }
 
   return (
     <div className="container mx-auto px-4 py-16 sm:px-6">

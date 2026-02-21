@@ -10,11 +10,20 @@ export async function GET() {
   if (!session?.user?.id) {
     return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
   }
-  const lawsuits = await prisma.lawsuit.findMany({
-    where: { userId: session.user.id },
-    orderBy: { updatedAt: "desc" },
-  });
-  return NextResponse.json({ lawsuits });
+  try {
+    const lawsuits = await prisma.lawsuit.findMany({
+      where: { userId: session.user.id },
+      orderBy: { updatedAt: "desc" },
+    });
+    return NextResponse.json({ lawsuits });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Erro ao carregar processos";
+    const isDbError = msg.includes("DATABASE_URL") || msg.includes("connect");
+    return NextResponse.json(
+      { error: isDbError ? "Configure o banco de dados na Vercel." : msg },
+      { status: isDbError ? 503 : 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -64,9 +73,13 @@ export async function POST(request: Request) {
     });
     return NextResponse.json({ lawsuit });
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Erro ao consultar processo";
-    console.error("[API lawsuits]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    const msg = err instanceof Error ? err.message : "Erro ao consultar processo";
+    const isDbError = msg.includes("DATABASE_URL") || msg.includes("connect");
+    console.error("[API lawsuits]", msg);
+    return NextResponse.json(
+      { error: isDbError ? "Configure o banco de dados na Vercel." : msg },
+      { status: isDbError ? 503 : 500 }
+    );
   }
 }
 

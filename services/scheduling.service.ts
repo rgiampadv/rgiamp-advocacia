@@ -3,6 +3,8 @@ import { createBoleto, getConsultationAmountCents } from "./boleto.service";
 import { addMinutes, format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
+export type PaymentMethod = "boleto" | "pix" | "card";
+
 export interface CreateSchedulingInput {
   name: string;
   email: string;
@@ -10,6 +12,7 @@ export interface CreateSchedulingInput {
   preferredDate: string;
   preferredTime: string;
   subject?: string;
+  paymentMethod?: PaymentMethod;
 }
 
 export async function createSchedulingWithBoleto(input: CreateSchedulingInput) {
@@ -33,11 +36,140 @@ export async function createSchedulingWithBoleto(input: CreateSchedulingInput) {
     "yyyy-MM-dd"
   );
 
+  const paymentMethod = input.paymentMethod ?? "boleto";
   const cpf = (process.env.BOLETO_CPF ?? "46999334838").replace(/\D/g, "");
+  const customerCpf = cpf.length >= 11 ? cpf : "00000000000";
+
+  if (process.env.ASAAS_API_KEY && paymentMethod === "pix") {
+    try {
+      const { createOrGetCustomer, createPayment, getPixQrCode } = await import("./asaas.service");
+      const customerId = await createOrGetCustomer({
+        name: input.name,
+        cpfCnpj: customerCpf,
+        email: input.email,
+        mobilePhone: input.phone,
+      });
+      const value = getConsultationAmountCents() / 100;
+      const description = "Consulta jurídica inicial - R$ 300,00";
+      const payment = await createPayment({
+        customerId,
+        billingType: "PIX",
+        value,
+        dueDate,
+        description,
+        externalReference: scheduling.id,
+      });
+
+      await prisma.scheduling.update({
+        where: { id: scheduling.id },
+        data: {
+          boletoId: payment.id,
+          boletoUrl: payment.invoiceUrl ?? undefined,
+        },
+      });
+
+      const pix = await getPixQrCode(payment.id);
+      return {
+        schedulingId: scheduling.id,
+        boletoUrl: payment.invoiceUrl,
+        boletoId: payment.id,
+        paymentMethod: "pix" as const,
+        pixCopyPaste: pix.payload,
+        pixQrCodeImage: pix.encodedImage,
+      };
+    } catch (err) {
+      console.error("[Scheduling] Asaas PIX:", err);
+      await prisma.scheduling.update({
+        where: { id: scheduling.id },
+        data: { status: "boleto_error" },
+      });
+      throw err;
+    }
+  }
+
+  if (process.env.ASAAS_API_KEY && paymentMethod === "card") {
+    try {
+      const { createOrGetCustomer, createPayment } = await import("./asaas.service");
+      const customerId = await createOrGetCustomer({
+        name: input.name,
+        cpfCnpj: customerCpf,
+        email: input.email,
+        mobilePhone: input.phone,
+      });
+      const value = getConsultationAmountCents() / 100;
+      const payment = await createPayment({
+        customerId,
+        billingType: "BOLETO",
+        value,
+        dueDate,
+        description: "Consulta jurídica inicial - R$ 300,00",
+        externalReference: scheduling.id,
+      });
+      await prisma.scheduling.update({
+        where: { id: scheduling.id },
+        data: {
+          boletoId: payment.id,
+          boletoUrl: payment.invoiceUrl ?? payment.bankSlipUrl ?? undefined,
+        },
+      });
+      return {
+        schedulingId: scheduling.id,
+        boletoUrl: payment.invoiceUrl ?? payment.bankSlipUrl,
+        boletoId: payment.id,
+        paymentMethod: "card" as const,
+      };
+    } catch (err) {
+      console.error("[Scheduling] Asaas card link:", err);
+      await prisma.scheduling.update({
+        where: { id: scheduling.id },
+        data: { status: "boleto_error" },
+      });
+      throw err;
+    }
+  }
+
+  if (process.env.ASAAS_API_KEY && paymentMethod === "boleto") {
+    try {
+      const { createOrGetCustomer, createPayment } = await import("./asaas.service");
+      const customerId = await createOrGetCustomer({
+        name: input.name,
+        cpfCnpj: customerCpf,
+        email: input.email,
+        mobilePhone: input.phone,
+      });
+      const value = getConsultationAmountCents() / 100;
+      const payment = await createPayment({
+        customerId,
+        billingType: "BOLETO",
+        value,
+        dueDate,
+        description: "Consulta jurídica inicial - R$ 300,00",
+        externalReference: scheduling.id,
+      });
+
+      await prisma.scheduling.update({
+        where: { id: scheduling.id },
+        data: {
+          boletoId: payment.id,
+          boletoUrl: payment.bankSlipUrl ?? payment.invoiceUrl ?? undefined,
+        },
+      });
+
+      return {
+        schedulingId: scheduling.id,
+        boletoUrl: payment.bankSlipUrl ?? payment.invoiceUrl,
+        boletoId: payment.id,
+        paymentMethod: "boleto" as const,
+      };
+    } catch (err) {
+      console.error("[Scheduling] Asaas boleto:", err);
+    }
+  }
+
   const boleto = await createBoleto({
     customerName: input.name,
     customerEmail: input.email,
-    customerCpf: cpf.length >= 11 ? cpf : "00000000000",
+    customerCpf: customerCpf,
     description: "Consulta jurídica inicial - R$ 300,00",
     dueDate,
     referenceId: scheduling.id,
@@ -63,6 +195,7 @@ export async function createSchedulingWithBoleto(input: CreateSchedulingInput) {
     schedulingId: scheduling.id,
     boletoUrl: boleto.boletoUrl,
     boletoId: boleto.boletoId,
+    paymentMethod: "boleto" as const,
   };
 }
 

@@ -7,9 +7,11 @@ export const OAB = "OAB/SP 542.173";
 
 export const LINKEDIN_URL = "https://www.linkedin.com/in/raphaelgiampietro/";
 
+export const INSTAGRAM_URL = "https://www.instagram.com/rgiampadv/";
+
 export function getInstagramUrl(): string {
   return (
     (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_INSTAGRAM_URL) ||
-    "https://www.instagram.com/"
+    INSTAGRAM_URL
   );
 }
