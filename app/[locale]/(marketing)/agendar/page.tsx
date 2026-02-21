@@ -13,6 +13,9 @@ export default async function AgendarPage({ params }: Props) {
       <h1 className="text-3xl font-bold text-[var(--blue-deep)]">{t("title")}</h1>
       <p className="mt-2 text-[var(--gold)] font-medium">{t("price")}</p>
       <p className="mt-1 text-sm text-[var(--muted-foreground)]">{t("priceNote")}</p>
+      <p className="mt-2 text-sm text-[var(--muted-foreground)] border-l-2 border-[var(--gold)] pl-3">
+        {t("refundPolicy")}
+      </p>
       <div className="mt-10 max-w-xl">
         <SchedulingForm />
       </div>
