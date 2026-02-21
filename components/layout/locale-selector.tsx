@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { Link, usePathname } from "@/i18n/routing";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
@@ -32,12 +31,13 @@ export function LocaleSelector({ className }: { className?: string }) {
           title={label}
           aria-current={currentLocale === code ? "true" : undefined}
         >
-          <Image
+          <img
             src={`https://flagcdn.com/w40/${country}.png`}
             alt={label}
             width={24}
             height={18}
             className="rounded-sm object-cover"
+            loading="lazy"
           />
         </Link>
       ))}

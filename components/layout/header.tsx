@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/layout/logo";
+import { LocaleSelector } from "@/components/layout/locale-selector";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -106,7 +107,8 @@ export function Header() {
         </nav>
         </div>
 
-        <div className="hidden md:flex items-center gap-6 shrink-0">
+        <div className="hidden md:flex items-center gap-4 shrink-0">
+          <LocaleSelector className="shrink-0" />
           <Link
             href="/sobre"
             className={cn(
@@ -126,6 +128,7 @@ export function Header() {
 
         {/* Mobile menu button */}
         <div className="flex items-center gap-2 md:hidden">
+          <LocaleSelector />
           <button
             type="button"
             className="inline-flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center rounded-md border border-[var(--border)] bg-transparent hover:bg-[var(--muted)] active:bg-[var(--muted)]"
@@ -148,6 +151,9 @@ export function Header() {
       {mobileOpen && (
         <div className="border-t border-[var(--border)] bg-[var(--card)] md:hidden">
           <nav className="container mx-auto flex flex-col gap-0 px-4 py-4">
+            <div className="mb-3">
+              <LocaleSelector />
+            </div>
             <Link href="/" className="min-h-[44px] flex items-center rounded-md px-4 py-3 text-sm font-medium hover:bg-[var(--muted)] active:bg-[var(--muted)]" onClick={() => setMobileOpen(false)}>
               {t("home")}
             </Link>
