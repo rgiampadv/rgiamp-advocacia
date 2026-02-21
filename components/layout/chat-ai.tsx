@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { whatsAppUrl } from "@/lib/whatsapp";
 
 type Message = { role: "user" | "assistant"; content: string };
 
@@ -37,10 +38,10 @@ export function ChatAI() {
         }),
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Erro ao enviar");
+      if (!res.ok) throw new Error(data.error ?? "CHAT_UNAVAILABLE");
       setMessages((prev) => [...prev, { role: "assistant", content: data.message }]);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Erro ao enviar.");
+      setError(t("unavailable"));
     } finally {
       setLoading(false);
     }
@@ -99,7 +100,17 @@ export function ChatAI() {
               </div>
             )}
             {error && (
-              <p className="text-sm text-red-600">{error}</p>
+              <div className="rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 px-3 py-2 text-sm">
+                <p className="text-amber-800 dark:text-amber-200">{error}</p>
+                <a
+                  href={whatsAppUrl()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-2 inline-block text-[var(--gold)] font-medium hover:underline"
+                >
+                  {t("contactWhatsApp")} →
+                </a>
+              </div>
             )}
           </div>
           <div className="border-t border-[var(--border)] p-3">

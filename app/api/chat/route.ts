@@ -10,10 +10,7 @@ export async function POST(request: Request) {
   try {
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
-      return NextResponse.json(
-        { error: "Chat não configurado. Defina OPENAI_API_KEY no .env." },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: "CHAT_UNAVAILABLE" }, { status: 503 });
     }
     const body = await request.json();
     const messages = Array.isArray(body.messages) ? body.messages : [];
@@ -37,6 +34,9 @@ export async function POST(request: Request) {
   } catch (err) {
     const message = err instanceof Error ? err.message : "Erro ao processar pergunta.";
     console.error("[API chat]", message);
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "CHAT_UNAVAILABLE" },
+      { status: 503 }
+    );
   }
 }
