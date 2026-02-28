@@ -20,6 +20,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   lawsuits      Lawsuit[]
+  posts         Post[]
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -88,4 +89,18 @@ model Lawsuit {
   updatedAt   DateTime @updatedAt
 
   @@unique([userId, number])
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  slug      String   @unique
+  title     String
+  excerpt   String
+  content   String
+  authorId  String?
+  author    User?    @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([slug])
 }

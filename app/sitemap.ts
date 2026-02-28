@@ -5,6 +5,7 @@ const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.rgiamp.adv.br"
 const staticPaths = [
   "",
   "/sobre",
+  "/blog",
   "/agendar",
   "/contato",
   "/politica-privacidade",

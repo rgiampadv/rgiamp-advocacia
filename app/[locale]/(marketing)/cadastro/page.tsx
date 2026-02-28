@@ -22,6 +22,10 @@ function CadastroForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    if (!name.trim()) {
+      setError("Nome é obrigatório.");
+      return;
+    }
     if (password !== confirmPassword) {
       setError("As senhas não coincidem.");
       return;
@@ -35,7 +39,7 @@ function CadastroForm() {
       const res = await fetch("/api/auth/cadastro", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: name.trim() || undefined, email: email.trim(), password }),
+        body: JSON.stringify({ name: name.trim(), email: email.trim(), password }),
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
@@ -73,11 +77,12 @@ function CadastroForm() {
       </p>
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
         <div>
-          <label className="block text-sm font-medium text-[var(--foreground)]">Nome (opcional)</label>
+          <label className="block text-sm font-medium text-[var(--foreground)]">Nome</label>
           <input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value)}
+            required
             className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm"
           />
         </div>

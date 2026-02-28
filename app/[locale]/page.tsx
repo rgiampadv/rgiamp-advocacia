@@ -35,6 +35,9 @@ export default async function HomePage({ params }: Props) {
               <Button asChild size="lg" variant="outline" className="border-[var(--off-white)]/50 text-[var(--off-white)] hover:bg-white/10 min-w-[200px] sm:min-w-0">
                 <Link href="/agendar">{t("hero.schedule")}</Link>
               </Button>
+              <Button asChild size="lg" variant="outline" className="border-[var(--off-white)]/50 text-[var(--off-white)] hover:bg-white/10 min-w-[200px] sm:min-w-0">
+                <Link href="/blog">{t("nav.blog")}</Link>
+              </Button>
             </div>
           </div>
         </div>
