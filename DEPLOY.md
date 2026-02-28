@@ -43,6 +43,7 @@ No projeto Vercel: **Settings** → **Environment Variables**. Adicione:
 | `NEXT_PUBLIC_SITE_URL` | Recomendado | `https://www.rgiamp.adv.br` |
 | `NEXT_PUBLIC_WHATSAPP_NUMBER` | Opcional | `5511974367189` |
 | `OPENAI_API_KEY` | Opcional (chat) | `sk-...` |
+| `ADMIN_EMAILS` | Blog (publicar posts) | `seu@email.com` (vírgula para vários) |
 
 \* Obrigatório se usar agendamento, login ou área do cliente.
 
@@ -88,6 +89,10 @@ npx prisma db push
 ```
 
 Isso cria as tabelas necessárias. Não é preciso repetir depois de cada deploy.
+
+### Admin do blog
+
+Para criar e editar posts do blog, configure `ADMIN_EMAILS` no `.env` com o(s) e-mail(s) que terão permissão (separados por vírgula). Depois de logado, acesse `/admin/blog` (ex.: `https://www.rgiamp.adv.br/pt/admin/blog`).
 
 ---
 
